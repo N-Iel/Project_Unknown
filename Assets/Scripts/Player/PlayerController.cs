@@ -23,10 +23,12 @@ public class PlayerController : MonoBehaviour
     Animator animator;
 
     [Header("Raycast")]
-    public Transform groundCheck;   // Origin point for raycast
+    public Transform[] borderChecks;// Origin point for main raycast
     public LayerMask groundLayer;   // Ground layer
     public float rayLength;         // Length of the ray
     public bool isGrounded;         // var that store if the player is or not in ground
+
+    Vector2 spawnPoint;
     #endregion
 
     #region Life Cycle
@@ -35,6 +37,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        spawnPoint = transform.position;
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
     }
@@ -128,8 +131,11 @@ public class PlayerController : MonoBehaviour
     // It will check if the player is touching the ground
     void IsGrounded()
     {
-        isGrounded = Physics2D.Raycast(groundCheck.position, Vector2.down, rayLength, groundLayer);
-        Debug.DrawRay(groundCheck.position, Vector2.down * rayLength, Color.red);
+        foreach (Transform borderCheck in borderChecks)
+        {
+            isGrounded = Physics2D.Raycast(borderCheck.position, Vector2.down, rayLength, groundLayer);
+            if (isGrounded) return;
+        }
     }
 
     #endregion
@@ -158,5 +164,11 @@ public class PlayerController : MonoBehaviour
     #endregion
 
     #region Other
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        transform.position = spawnPoint;
+    }
+
     #endregion
 }
